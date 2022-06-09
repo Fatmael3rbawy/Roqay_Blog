@@ -1,13 +1,21 @@
 <?php
 
 namespace App\Http\Controllers;
-
+use App\Http\Interfaces\TagRepositoryInterface;
+use App\Http\Requests\Tag\StoreTagRequest;
 use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class TagController extends Controller
 {
+    private $tagRepoInterface;
+    public function __construct(TagRepositoryInterface $tagRepoInterface)
+    {
+        $this->tagRepoInterface = $tagRepoInterface;
+    }
+
+
     /**
      * Display a listing of the resource.
      *
@@ -15,8 +23,7 @@ class TagController extends Controller
      */
     public function index()
     {
-        $tags = Tag::orderBy('id', 'desc')
-        ->paginate(10);
+        $tags = $this->tagRepoInterface->all();
         return view('tags.index',compact('tags'));
     }
 
@@ -36,19 +43,16 @@ class TagController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(StoreTagRequest $request)
     {
-        $request->validate([
-            'name'=>'required|string|min:3'
-        ]);
-
-        Tag::create([
+        $attributes = [
             'name'=>$request->name,
             'user_id' =>Auth::user()->id
+        ];
+        $this->tagRepoInterface->create($attributes);
+        return response()->json(['success' => 'tag created successfully.']);
 
-        ]);
-
-        return redirect(route('tag.index'))->with('message','the tag has been ceated successfully');
+        // return redirect(route('tag.index'))->with('message','the tag has been ceated successfully');
     }
 
     /**
@@ -70,7 +74,7 @@ class TagController extends Controller
      */
     public function edit($id)
     {
-        $tag = Tag::find($id);
+        $tag =  $this->tagRepoInterface->find($id);
         return view('tags.edit',compact('tag'));
     }
 
@@ -86,11 +90,10 @@ class TagController extends Controller
         $request->validate([
             'name'=>'required|string|min:3'
         ]);
-
-        $tag = Tag::find($id);
-        $tag->update([
+        $attributes = [
             'name'=>$request->name
-        ]);
+        ];
+        $this->tagRepoInterface->update($attributes ,$id);
 
         return redirect(route('tag.index'))->with('message','the tag has been updated successfully');
     }
@@ -103,8 +106,7 @@ class TagController extends Controller
      */
     public function destroy($id)
     {
-        $tag = Tag::find($id);
-        $tag->delete();
+        $this->tagRepoInterface->delete($id);
         return back()->with('message','the tag has been deleted successfully');
     }
 }

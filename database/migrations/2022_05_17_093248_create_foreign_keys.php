@@ -55,6 +55,15 @@ class CreateForeignKeys extends Migration
 				->onUpdate('restrict')
 				->onDelete('cascade');
 		});
+
+		Schema::table('transactions', function (Blueprint $table) {
+
+			$table->foreignId('user_id')
+				->constrained('users')
+				->onUpdate('restrict')
+				->onDelete('cascade');
+		});
+
 	}
 
 	public function down()

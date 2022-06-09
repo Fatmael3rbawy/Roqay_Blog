@@ -2,16 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Interfaces\PostRepositoryInterface;
+use App\Http\Interfaces\TagRepositoryInterface;
+use App\Http\Interfaces\CategoryRepositoryInterface;
 use App\Http\Requests\post\StorePostRequest;
 use App\Http\Requests\post\UpdatePostRequest;
-use App\Models\Post;
+use App\Traits\GeneralTrait;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
-use App\Models\Category;
-use App\Models\Tag;
 
 class PostController extends Controller
 {
+    use GeneralTrait;
+
+    private $postRepoInterface;
+    private $tagRepoInterface;
+    private $categoryRepoInterface;
+
+    public function __construct(PostRepositoryInterface $postRepoInterface, TagRepositoryInterface $tagRepoInterface, CategoryRepositoryInterface $categoryRepoInterface)
+    {
+        $this->postRepoInterface = $postRepoInterface;
+        $this->tagRepoInterface = $tagRepoInterface;
+        $this->categoryRepoInterface = $categoryRepoInterface;
+    }
     /**
      * Display a listing of the resource.
      *
@@ -19,10 +33,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $user_id = Auth::user()->id;
-        $posts = Post::where('user_id', '=', $user_id)
-            ->orderBy('id', 'desc')
-            ->paginate(10);
+        $posts =  $this->postRepoInterface->all();
         // dd($posts);
         return view('posts.index', compact('posts'));
     }
@@ -34,8 +45,8 @@ class PostController extends Controller
      */
     public function create()
     {
-        $tags = Tag::all();
-        $categories = Category::all();
+        $tags =  $this->tagRepoInterface->all();
+        $categories =  $this->categoryRepoInterface->all();
         return view('posts.create', compact('categories', 'tags'));
     }
 
@@ -47,23 +58,30 @@ class PostController extends Controller
      */
     public function store(StorePostRequest $request)
     {
+
+       
         //store image in public/images/products
         $image = $request->file('image');
         $ext = $image->getClientOriginalExtension();
         $image_name = "post" . uniqid() . ".$ext";
         $image->move(public_path('images/posts'), $image_name);
 
-        $post = Post::create([
+        $attributes = [
             'title' => $request->title,
             'body' => $request->body,
             'user_id' => Auth::user()->id,
             'category_id' => $request->category,
             'image' => $image_name
-        ]);
+        ];
 
-        $post->tags()->sync($request->tags);
+        $post = $this->postRepoInterface->create($attributes);
+        $post->tags()->attach($request->tags);
+        // return redirect(route('posts.index'))->with('message', 'The post has been added successfully');
+        // if(!$post){
+        //     return response()->json(['error' => 'error']);
 
-        return redirect(route('posts.index'))->with('message', 'The post has been added successfully');
+        // }else
+        return response()->json(['success' => 'Post created successfully.']);
     }
 
     /**
@@ -74,7 +92,7 @@ class PostController extends Controller
      */
     public function show($id)
     {
-        $post = Post::find($id);
+        $post = $this->postRepoInterface->find($id);
         return view('posts.show', compact('post'));
     }
 
@@ -86,9 +104,10 @@ class PostController extends Controller
      */
     public function edit($id)
     {
-        $categories = Category::all();
-        $tags = Tag::all();
-        $post = Post::find($id);
+        $tags =  $this->tagRepoInterface->all();
+        $categories =  $this->categoryRepoInterface->all();
+
+        $post = $this->postRepoInterface->find($id);
         return view('posts.edit', compact('post', 'categories', 'tags'));
     }
 
@@ -101,7 +120,7 @@ class PostController extends Controller
      */
     public function update(UpdatePostRequest $request, $id)
     {
-        $post = Post::find($id);
+        $post = $this->postRepoInterface->find($id);
         $image_name = $post->image;
         // check if user upload image or not
         if ($request->hasFile('image')) {
@@ -116,14 +135,16 @@ class PostController extends Controller
             $image->move(public_path('images/posts'), $image_name);
         }
 
-        $post->update([
+        $attributes = [
             'title' => $request->title,
             'body' => $request->body,
             'user_id' => Auth::user()->id,
             'category_id' => $request->category,
             'image' => $image_name
 
-        ]);
+        ];
+
+        $this->postRepoInterface->update($attributes, $id);
         $post->tags()->sync($request->tags);
 
         return redirect(route('posts.index'))->with('message', 'The post has been updated successfully');
@@ -135,13 +156,10 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
-        $post = Post::find($id);
-        if ($post->image !== '') {
-            unlink(public_path('images/posts/') . $post->image);
-        }
-        $post->delete();
+    public function destroy(Request $request)
+    {dd($request->id);
+        $this->postRepoInterface->delete($request->id);
+        
         return back()->with('message', 'The post has been deleted successfully');
     }
 }

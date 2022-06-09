@@ -4,7 +4,11 @@
             {{ __('Home') }}
         </h2>
     </x-slot>
-   
+   @if (session('message'))
+       <div class="alert alert-success">
+           {{session('message')}}
+       </div>
+   @endif
     <link rel="stylesheet"
         href="https://cdnjs.cloudflare.com/ajax/libs/material-design-iconic-font/2.2.0/css/material-design-iconic-font.min.css">
 

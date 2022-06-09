@@ -23,7 +23,7 @@ class GitHubController extends Controller
      */
     public function handleGithubCallback()
     {
-        // try {
+        try {
             $user = Socialite::driver('github')->user();
             // dd($user);
             // $user = Socialite::driver('github')->user();
@@ -36,19 +36,18 @@ class GitHubController extends Controller
          
             }else{
                 $newUser = User::updateOrCreate(['email' => $user->email],[
-                        'name' => "fatma",
+                        'name' => "fatma ali",
                         'github_id'=> $user->id,
                         'password' => Hash::make('fffffggg')
                     ]);
         
                 Auth::login($newUser);
-                dd(Auth::user());
-        // return 'ok';
+                // dd(Auth::user());
                  return redirect()->intended('dashboard');
             }
         
-        // } catch (Exception $e) {
-        //     dd($e->getMessage());
-        // }
+        } catch (Exception $e) {
+            dd($e->getMessage());
+        }
     }
 }

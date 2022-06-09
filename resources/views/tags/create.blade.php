@@ -1,48 +1,80 @@
-<x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Create Tag') }}
-        </h2>
-    </x-slot>
+@extends('layouts.admin')
+@section('title')
+    Create Tag
+@endsection
+@section('content')
+    <div class="container-fluid py-4">
 
-    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
-    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
-    <link rel="stylesheet" href="{{ asset('css/post.css') }}">
-
-    <!------ Include the above in your HEAD tag ---------->
-
-    <div class="container">
-        <div class="row">
-
-            <div class="col-md-8 col-md-offset-2">
-
-                <h1>Create Tag</h1>
-
-                <form action="{{route('tag.store')}}" method="POST" >
-                    @csrf
-
-                    <div class="form-group">
-                        <label for="title">Name <span class="require">*</span></label>
-                        <input type="text" class="form-control" name="name" />
-                    </div>
-                    @error('name')
-                    <div class="alert alert-danger">{{ $message }}</div>
-                    @enderror
-                    <div class="form-group">
-                        <p><span class="require">*</span> - required fields</p>
-                    </div>
-
-                    <div class="form-group">
-                        <button type="submit" class="btn btn-primary">
-                            Create
-                        </button>
-                       
-                    </div>
-
-                </form>
-            </div>
-
+        <div class="alert alert-success text-center" id='success_msg' style='display:none;'>
+            Tag created successfully.
         </div>
+        <form method="POST" id='tagForm'>
+        @csrf
+            <div class="row mt-4">
+                <div class="col-lg-8 mt-lg-0 mt-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="font-weight-bolder">Tag Information</h5>
+                            <div class="row">
+                                <div class="col-12 col-sm-6">
+                                    <label>Name</label>
+                                    <input class="form-control" type="text" name="name" />
+                                </div>
+                                    <div style="color:red" id="name"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br><br>
+            <div class="row">
+                <div class="col-lg-6 text-right d-flex flex-column justify-content-center">
+                    <button type="submit" class="btn bg-gradient-primary mb-0 ms-lg-auto me-lg-0 me-auto mt-lg-0 mt-2 "
+                        id='save'>Save</button>
+                </div>
+            </div>
+        </form>
     </div>
-</x-app-layout>
+    <br><br><br><br><br><br><br>
+@endsection
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+    $.ajaxSetup({
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        }
+    });
+
+    $(document).on('click', '#save', function(e) {
+        e.preventDefault();
+        $.ajax({
+            type: 'POST',
+            data: new FormData($('#tagForm')[0]),
+            dataType: 'json',
+            contentType: false,
+            cache: false,
+            processData: false,
+            url: "{{ route('tag.store') }}",
+            
+            success: function(data) {
+                if ($.isEmptyObject(data.error)) {
+                        console.log(data.success);
+                        $('#success_msg').show();
+                        // $('#success_msg').innerHTML(data.success);
+                        // location.reload();
+                    } else {
+                       
+                        console.log(data.error);
+                        for (var error in data.error) {
+                            var div = document.getElementById(error);
+                            (data.error[error]).forEach(element => {
+                                div.style.display = 'block';
+                                div.innerHTML = element;
+                            });
+                        }
+                    }
+
+            }
+        });
+    });
+</script>

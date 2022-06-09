@@ -2,11 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Interfaces\UserRepositoryInterface;
+use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
+    private $userRepoInterface;
+    public function __construct( UserRepositoryInterface $userRepoInterface){
+        $this->userRepoInterface = $userRepoInterface;
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -16,48 +24,15 @@ class UserController extends Controller
     {
         return view('users.profile');
     }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
     /**
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit()
     {
-    return view('users.edit')  ;      
+        return view('users.edit');
     }
 
     /**
@@ -67,16 +42,15 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request)
     {
         $request->validate([
-            'name'=> 'required|string|min:3',
-            'email'=> 'required|email',
-            'image' =>'image'
+            'name' => 'required|string|min:3',
+            'email' => 'required|email',
+            'image' => 'image'
         ]);
-
-        $user = User::find($id);
-        $image_name = $user->image;
+        
+        $image_name = Auth::user()->image;
         // check if user upload image or not
         if ($request->hasFile('image')) {
             // check if user has image or not
@@ -89,13 +63,15 @@ class UserController extends Controller
             $image_name = "user" . uniqid() . ".$ext";
             $image->move(public_path('images/users'), $image_name);
         }
-        $user->update([
-            'name' =>$request->name,
-            'email' =>$request->email,
-            'image' =>$image_name
-        ]);
+        $attributes= [
+            'name' => $request->name,
+            'email' => $request->email,
+            'image' => $image_name
+        ];
 
-        return redirect(route('user.profile'))->with('message','Your profile has been updated successfully');
+        $this->userRepoInterface->update($attributes , auth()->user()->id);
+         
+        return redirect(route('user.profile'))->with('message', 'Your profile has been updated successfully');
     }
 
     /**
@@ -104,10 +80,9 @@ class UserController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy()
     {
-        $user = User::find($id);
-        $user->delete();
-        return redirect('/');
+        $this->userRepoInterface->delete(auth()->user()->id);
+        return redirect('/dashboard');
     }
 }

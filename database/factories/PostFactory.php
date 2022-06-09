@@ -17,7 +17,7 @@ class PostFactory extends Factory
 
             'title' => $this->faker->word(),
             'body' => $this->faker->text(),
-            'image' => $this->faker->image('public/images/posts',640,480, null, false),
+            'image' => $this->faker->imageUrl(400, 300),
             'user_id' => \App\Models\User::all()->random()->id,
             'category_id'  => \App\Models\Category::all()->random()->id,
             

@@ -13,18 +13,55 @@
     
     <!-- Styles -->
     <link rel="stylesheet" href="{{ asset('css/app.css') }}">
+    <style>
+        .chat {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+        }
+      
+        .chat li {
+          margin-bottom: 10px;
+          padding-bottom: 5px;
+          border-bottom: 1px dotted #B3A9A9;
+        }
+      
+        .chat li .chat-body p {
+          margin: 0;
+          color: #777777;
+        }
+      
+        .panel-body {
+          overflow-y: scroll;
+          height: 350px;
+        }
+      
+        ::-webkit-scrollbar-track {
+          -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+          background-color: #F5F5F5;
+        }
+      
+        ::-webkit-scrollbar {
+          width: 12px;
+          background-color: #F5F5F5;
+        }
+      
+        ::-webkit-scrollbar-thumb {
+          -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+          background-color: #555;
+        }
+      </style>
 
     <!-- Scripts -->
     <script src="{{ asset('js/app.js') }}" defer></script>
 
     
-    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
     
-    <link rel="stylesheet" href="{{ asset('css/post.css') }}">
 </head>
 
 <body class="font-sans antialiased">
-    <div class="min-h-screen bg-gray-100">
+    @yield('content')
+    {{-- <div class="min-h-screen bg-gray-100">
         @include('layouts.navigation')
 
         <!-- Page Heading -->
@@ -38,10 +75,10 @@
         <main>
             {{ $slot }}
         </main>
-    </div>
-
+    </div> --}}
+{{-- 
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.0/js/bootstrap.min.js"></script>
-    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script>
+    <script src="//code.jquery.com/jquery-1.11.1.min.js"></script> --}}
 </body>
 
 </html>

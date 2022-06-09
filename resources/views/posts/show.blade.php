@@ -1,4 +1,4 @@
-<x-app-layout>
+{{-- <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
             {{ __('Show Post') }}
@@ -40,4 +40,58 @@
         </div>
     </div>
 
-</x-app-layout>
+</x-app-layout> --}}
+
+@extends('layouts.admin')
+@section('title')
+    Post
+@endsection
+@section('content')
+    <div class="container-fluid py-4">
+            
+           
+            <div class="row mt-4">
+                <div class="col-lg-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="font-weight-bolder">Post Image</h5>
+                            <div class="row">
+                                <div class="col-12">
+                                    <img class="w-100 border-radius-lg shadow-lg mt-3" name='image'
+                                        src="{{asset('images\posts/'.$post->image)}}" alt="post_image">
+                                </div>
+                               
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-8 mt-lg-0 mt-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="font-weight-bolder">Post Information</h5><br>
+                            <div class="row">
+                                <div class="col-12 col-sm-6">
+                                    <label>Title</label><br>
+                                    <p>{{ $post->title}} </p>
+                                </div>
+                            </div>
+                         
+                            <div class="row">
+                                <div class="col-12 col-sm-6">
+                                    <label>Body</label><br>
+                                    <p>{{ $post->body }} </p>                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-sm-6">
+                                    <label>Category</label><br>
+                                    <p>{{ $post->category ->name }} </p>                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <br><br><br><br>
+@endsection

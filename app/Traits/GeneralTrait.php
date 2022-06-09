@@ -8,8 +8,8 @@ trait GeneralTrait
     public function returnError( $msg)
     {
         return response()->json([
-            'status' => false,
-            'msg' => $msg
+            // 'status' => false,
+            'error' => $msg
         ]);
     }
 
@@ -31,11 +31,20 @@ trait GeneralTrait
         ]);
     }
 
+    public function returnValidateData($validate)
+    {
+        return response()->json([
+            'status' => 422,
+            'msg' => 'error',
+            'validation errors' => $validate
+        ]);
+    }
+
 
     
     public function returnValidationError( $validator)
     {
-        return $this->returnError( $validator->errors()->first());
+        return $this->returnError( $validator);
     }
 
 

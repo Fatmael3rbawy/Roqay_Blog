@@ -2,12 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Interfaces\CategoryRepositoryInterface;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class CategoryController extends Controller
 {
+     private $categoryRepoInterface;
+    public function __construct(CategoryRepositoryInterface $categoryRepoInterface)
+    {
+        $this->categoryRepoInterface = $categoryRepoInterface;
+    }
    
     /**
      * Display a listing of the resource.
@@ -16,8 +22,7 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        $categories = Category::orderBy('id', 'desc')
-        ->paginate(10);
+        $categories = $this->categoryRepoInterface->all();
         return view('categories.index',compact('categories'));
     }
 
@@ -42,26 +47,16 @@ class CategoryController extends Controller
         $request->validate([
             'name'=>'required|string|min:3'
         ]);
-
-        Category::create([
+        $attributes = [
             'name'=>$request->name,
             'user_id'=> Auth::user()->id
-        ]);
+        ];
+        $this->categoryRepoInterface->create($attributes);
 
         return redirect(route('category.index'))->with('message','the category has been ceated successfully');
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
+   
     /**
      * Show the form for editing the specified resource.
      *
@@ -70,7 +65,7 @@ class CategoryController extends Controller
      */
     public function edit($id)
     {
-        $category = Category::find($id);
+        $category = $this->categoryRepoInterface->find($id);
         return view('categories.edit',compact('category'));
     }
 
@@ -87,10 +82,10 @@ class CategoryController extends Controller
             'name'=>'required|string|min:3'
         ]);
 
-        $category = Category::find($id);
-        $category->update([
+        $attributes =[
             'name'=>$request->name
-        ]);
+        ];
+        $this->categoryRepoInterface->update($attributes,$id);
 
         return redirect(route('category.index'))->with('message','the category has been updated successfully');
     }
@@ -103,8 +98,7 @@ class CategoryController extends Controller
      */
     public function destroy($id)
     {
-        $category = Category::find($id);
-        $category->delete();
+       $this->categoryRepoInterface->delete($id);
         return back()->with('message','the category has been deleted successfully');
     }
 }

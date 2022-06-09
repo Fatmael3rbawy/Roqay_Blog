@@ -1,10 +1,13 @@
 <?php
 
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ChatsController;
 use App\Http\Controllers\FacebookController;
+use App\Http\Controllers\FatorahController;
 use App\Http\Controllers\GitHubController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\TagController;
+use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\UserController;
 use App\Models\Post;
 use Illuminate\Support\Facades\Route;
@@ -26,8 +29,8 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     $posts = Post::orderby('id','desc')->paginate(9);
-    return view('home',compact('posts'));
-})->middleware(['auth'])->name('dashboard');
+    return view('dashboard',compact('posts'));
+})->name('dashboard');
 
 //Facebook Login
 Route::get('auth/facebook', [FacebookController::class, 'redirectToFacebook']);
@@ -36,7 +39,14 @@ Route::get('auth/facebook/callback', [FacebookController::class, 'handleFacebook
 //Github Login
 Route::get('auth/github', [GitHubController::class, 'redirectToGithub']);
 Route::get('auth/github/callback', [GitHubController::class, 'handleGithubCallback']);
- 
+
+
+Route::middleware('auth')->group(function () {
+    // Route::resources([
+    //     //Post CRUD Routes
+    //     'photos' => PhotoController::class,
+    //     'posts' => PostController::class,
+    // ]);
 //Post CRUD Routes
 Route::get('/posts' , [PostController::class ,'index'])->name('posts.index');
 Route::get('/post/create' , [PostController::class ,'create'])->name('posts.create');
@@ -44,13 +54,18 @@ Route::post('/post/store' , [PostController::class ,'store'])->name('posts.store
 Route::get('/post/show/{id}' , [PostController::class ,'show'])->name('posts.show');
 Route::get('/post/edit/{id}' , [PostController::class ,'edit'])->name('posts.edit');
 Route::post('/post/update/{id}' , [PostController::class ,'update'])->name('posts.update');
-Route::delete('/post/destroy/{id}' , [PostController::class ,'destroy'])->name('posts.destroy');
+Route::post('/post/destroy' , [PostController::class ,'destroy'])->name('posts.destroy');
 
 // User CRUD Routes
 Route::get('/myProfile' , [UserController::class ,'index'])->name('user.profile');
-Route::get('/user/edit/{id}' , [UserController::class ,'edit'])->name('user.edit');
-Route::post('/user/update/{id}' , [UserController::class ,'update'])->name('user.update');
-Route::delete('/user/destroy/{id}' , [UserController::class ,'destroy'])->name('user.destroy');
+Route::get('/user/edit' , [UserController::class ,'edit'])->name('user.edit');
+Route::post('/user/update' , [UserController::class ,'update'])->name('user.update');
+Route::delete('/user/destroy' , [UserController::class ,'destroy'])->name('user.destroy');
+
+//Transaction routes
+Route::get('/myPayments' , [TransactionController::class ,'payments'])->name('user.payments');
+Route::delete('/transaction/destroy/{id}' , [TransactionController::class ,'destroy'])->name('transaction.destroy');
+
 
 //Tag CRUD Routes
 Route::get('/tags' , [TagController::class ,'index'])->name('tag.index');
@@ -58,7 +73,7 @@ Route::get('/tag/create' , [TagController::class ,'create'])->name('tag.create')
 Route::post('/tag/store' , [TagController::class ,'store'])->name('tag.store');
 Route::get('/tag/edit/{id}' , [TagController::class ,'edit'])->name('tag.edit');
 Route::post('/tag/update/{id}' , [TagController::class ,'update'])->name('tag.update');
-Route::delete('/tag/destroy/{id}' , [TagController::class ,'destroy'])->name('tag.destroy');
+Route::post('/tag/destroy/{id}' , [TagController::class ,'destroy'])->name('tag.destroy');
 
 
 //Category CRUD Routes
@@ -70,7 +85,21 @@ Route::post('/category/update/{id}' , [CategoryController::class ,'update'])->na
 Route::delete('/category/destroy/{id}' , [CategoryController::class ,'destroy'])->name('category.destroy');
 
 
+//Fatorah Routes
 
+
+Route::get('/pay',[FatorahController::class,'pay'])->name('mailActivation');
+Route::get('/paymentResponse/{id}',[FatorahController::class,'payment_response']);
+
+Route::get('/callback',[FatorahController::class,'callback']);
+Route::get('/error',[FatorahController::class,'error']);
+
+});
+
+//chat routes
+Route::get('/chats', [ChatsController::class,'index'])->name('users.chat');
+Route::get('messages', [ChatsController::class,'fetchMessages']);
+Route::post('/messages', [ChatsController::class,'sendMessage']);
 
 
 require __DIR__.'/auth.php';

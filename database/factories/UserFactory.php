@@ -21,7 +21,8 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' =>  Hash::make(12345678), // password
             'remember_token' => Str::random(10),
-            'image' => $this->faker->image('public/images/users',640,480, null, false),
+            'image' => $this->faker->imageUrl(400, 300),
+            //'image' => $this->faker->image('public/images/users',640,480, null, false),
         ];
     }
 
